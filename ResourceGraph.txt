@@ -1,0 +1,17 @@
+Resources
+| where type == 'microsoft.hybridcompute/machines'
+| project
+	id,
+	JoinID = toupper(id),
+	ComputerName = tostring(properties.osProfile.computerName),
+	OSName = tostring(properties.osName)
+| join kind=inner(
+	Resources
+	| where type == 'microsoft.hybridcompute/machines/extensions' and name =~ 'WindowsAgent.SqlServer'
+	| project
+		MachineId = toupper(substring(id, 0, indexof(id, '/extensions'))),
+		ExtensionName = name,
+        ExtensionStatus = properties.provisioningState
+) on $left.JoinID == $right.MachineId
+| summarize Extensions = make_list(ExtensionName) by id, ComputerName, OSName, tostring(ExtensionStatus)
+| order by tolower(OSName) asc
