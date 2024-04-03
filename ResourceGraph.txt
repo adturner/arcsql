@@ -11,7 +11,8 @@ Resources
 	| project
 		MachineId = toupper(substring(id, 0, indexof(id, '/extensions'))),
 		ExtensionName = name,
-        ExtensionStatus = properties.provisioningState
+        ExtensionStatus = properties.provisioningState,
+        ExtensionMessage = split(properties.instanceView.status.message, ';', 2)
 ) on $left.JoinID == $right.MachineId
-| summarize Extensions = make_list(ExtensionName) by id, ComputerName, OSName, tostring(ExtensionStatus)
+| summarize Extensions = make_list(ExtensionName) by id, ComputerName, OSName, tostring(ExtensionStatus), tostring(ExtensionMessage)
 | order by tolower(OSName) asc

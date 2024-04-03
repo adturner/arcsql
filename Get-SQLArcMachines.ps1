@@ -14,7 +14,14 @@ foreach($sqlMachine in $sqlMachines){
     $sqlextension | Add-Member -MemberType NoteProperty -Name "MachineName" -Value $sqlMachine.Name
     $sqlextension | Add-Member -MemberType NoteProperty -Name "CurrentLicenseType" -Value $currentLicenseState
 
+    $extensionmessage = $sqlextension.StatusMessage.Split(';').Trim() | Where-Object {$_ -like 'uploadStatus*'}
+    $sqlextension | Add-Member -MemberType NoteProperty -Name "UploadStatus" -Value $extensionmessage
+    
     $extensionStatusList += $sqlextension
 }
 
-$extensionStatusList | Select-Object MachineName, ResourceGroupName, Name, Location, TypeHandlerVersion, ProvisioningState, CurrentLicenseType | Format-Table
+$extensionStatusList | Select-Object MachineName, ResourceGroupName, Name, Location, TypeHandlerVersion, ProvisioningState, CurrentLicenseType, UploadStatus | Format-Table
+
+
+
+Get-AzResource -ResourceId '/subscriptions/6e967edb-425b-4a33-ae98-f1d2c509dda3/resourceGroups/northwindrisk/providers/Microsoft.HybridCompute/machines/northwindsql/extensions/WindowsAgent.SqlServer'
