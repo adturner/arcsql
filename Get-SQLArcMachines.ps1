@@ -1,6 +1,6 @@
 Login-AzAccount
 
-
+#Install-Module -Name Az.ConnectedMachine
 
 $sqlMachines = Get-AzConnectedMachine | Where-Object {$_.MssqlDiscovered -eq $true}
 $extensionStatusList = @()
