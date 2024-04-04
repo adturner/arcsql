@@ -4,6 +4,7 @@ Resources
 	id,
 	JoinID = toupper(id),
 	ComputerName = tostring(properties.osProfile.computerName),
+    subscriptionId = tostring(subscriptionId),
 	OSName = tostring(properties.osName)
 | join kind=inner(
 	Resources
@@ -14,5 +15,5 @@ Resources
         ExtensionStatus = properties.provisioningState,
         ExtensionMessage = split(properties.instanceView.status.message, ';', 2)
 ) on $left.JoinID == $right.MachineId
-| summarize Extensions = make_list(ExtensionName) by id, ComputerName, OSName, tostring(ExtensionStatus), tostring(ExtensionMessage)
-| order by tolower(OSName) asc
+| summarize Extensions = make_list(ExtensionName) by id, subscriptionId, ComputerName, OSName, tostring(ExtensionStatus), tostring(ExtensionMessage)
+| order by subscriptionId, ComputerName asc
