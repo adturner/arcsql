@@ -8,12 +8,15 @@ Resources
 	OSName = tostring(properties.osName)
 | join kind=inner(
 	Resources
-	| where type == 'microsoft.hybridcompute/machines/extensions' and name =~ 'WindowsAgent.SqlServer'
+	| where type == 'microsoft.hybridcompute/machines/extensions'
+    | where properties.type in ('WindowsAgent.SqlServer','LinuxAgent.SqlServer')
+    | parse properties with * 'uploadStatus : ' uploadStatus ';' *
 	| project
 		MachineId = toupper(substring(id, 0, indexof(id, '/extensions'))),
 		ExtensionName = name,
         ExtensionStatus = properties.provisioningState,
-        ExtensionMessage = split(properties.instanceView.status.message, ';', 2)
+        UploadStatus = uploadStatus
+    // uncomment to include only failed DPS check| where UploadStatus !in('OK')
 ) on $left.JoinID == $right.MachineId
-| summarize Extensions = make_list(ExtensionName) by id, subscriptionId, ComputerName, OSName, tostring(ExtensionStatus), tostring(ExtensionMessage)
-| order by subscriptionId, ComputerName asc
+| summarize Extensions = make_list(ExtensionName) by id, subscriptionId, ComputerName, OSName, tostring(ExtensionStatus), tostring(UploadStatus)
+| order by subscriptionId, ExtensionStatus, UploadStatus, ComputerName asc
