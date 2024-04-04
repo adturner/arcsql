@@ -15,8 +15,9 @@ Resources
 		MachineId = toupper(substring(id, 0, indexof(id, '/extensions'))),
 		ExtensionName = name,
         ExtensionStatus = properties.provisioningState,
-        UploadStatus = uploadStatus
-    // uncomment to include only failed DPS check| where UploadStatus !in('OK')
+        UploadStatus = uploadStatus,
+        LicenseType = properties.settings.LicenseType
+    //| where UploadStatus !in('OK')
 ) on $left.JoinID == $right.MachineId
-| summarize Extensions = make_list(ExtensionName) by id, subscriptionId, ComputerName, OSName, tostring(ExtensionStatus), tostring(UploadStatus)
-| order by subscriptionId, ExtensionStatus, UploadStatus, ComputerName asc
+| summarize Extensions = make_list(ExtensionName) by id, subscriptionId, ComputerName, OSName, tostring(ExtensionStatus), tostring(UploadStatus), tostring(LicenseType)
+| order by subscriptionId, ExtensionStatus, UploadStatus, LicenseType, ComputerName asc
